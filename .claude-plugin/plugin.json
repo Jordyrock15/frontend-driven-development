@@ -1,0 +1,10 @@
+{
+  "name": "frontend-driven-development",
+  "description": "Disciplined frontend development: senior engineer standards, codebase-aware architecture planning, visual verification, strict TypeScript, and parallel task orchestration",
+  "version": "0.1.0",
+  "author": {
+    "name": "Jordan Barrand"
+  },
+  "license": "MIT",
+  "keywords": ["frontend", "react", "nextjs", "typescript", "architecture", "testing", "accessibility", "design-system"]
+}
