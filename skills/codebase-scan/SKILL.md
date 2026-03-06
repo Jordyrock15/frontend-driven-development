@@ -33,7 +33,7 @@ Detect from these:
 
 ### Step 3: Glob for component directories
 
-Search for: `src/components`, `src/app`, `src/pages`, `app/`, `pages/`, `src/features`, `src/ui`.
+Search for: `src/components`, `src/app`, `src/pages`, `app/`, `pages/`, `src/features`, `src/ui`, `src/domain`, `src/application`, `src/infrastructure`, `src/views`, `src/viewmodels`, `src/models`, `src/controllers`, `src/containers`, `src/presenters`, `src/atoms`, `src/molecules`, `src/organisms`, `src/templates`.
 
 Determine folder structure: feature-based, atomic, flat, or other.
 
@@ -41,7 +41,23 @@ Check for barrel exports (`index.ts` re-exports) in component directories.
 
 Check for shared/common/ui component directories.
 
-### Step 4: Read 3-5 representative components
+### Step 4: Detect architecture pattern
+
+Based on folder structure and file patterns from steps 1-3, identify which pattern the codebase follows:
+
+| Pattern | Detection signals |
+|---|---|
+| **MVVM** | `viewmodels/` or `*.viewmodel.ts` files, hooks that hold all logic, components are purely presentational |
+| **MVC** | `controllers/`, `models/`, `views/` directories, route handlers with logic |
+| **Feature-based / Vertical slices** | Each feature folder contains its own components, hooks, types, tests (e.g. `src/features/auth/`, `src/features/dashboard/`) |
+| **Atomic Design** | `atoms/`, `molecules/`, `organisms/`, `templates/`, `pages/` directory structure |
+| **Container/Presenter** | `containers/` and `components/` split, or `*.container.tsx` / `*.presenter.tsx` naming |
+| **Colocation** | Everything for a feature lives together (component + test + styles + hooks in same folder) vs separated by type |
+| **Clean Architecture** | `domain/`, `application/`, `infrastructure/` layers with clear dependency direction |
+
+Report whichever pattern is detected. If mixed or unclear, note that. New components MUST follow the detected pattern — do not introduce a different architecture.
+
+### Step 5: Read 3-5 representative components
 
 Pick components from different directories. For each, detect:
 
@@ -49,8 +65,9 @@ Pick components from different directories. For each, detect:
 - **Props patterns:** TypeScript interfaces vs type aliases?
 - **Styling approach:** CSS modules (.module.css imports), Tailwind classes, styled-components, inline styles?
 - **State management patterns:** React context usage, hooks, store imports?
+- **Logic placement:** Where does business logic live? (in component, in hooks, in viewmodels, in services?)
 
-### Step 5: Check test files
+### Step 6: Check test files
 
 Glob for `**/*.test.*`, `**/*.spec.*`, `**/__tests__/**`.
 
@@ -64,10 +81,11 @@ Summarize findings before proceeding. List what was detected for each category:
 2. Styling approach
 3. Testing tools and conventions
 4. State management
-5. Component patterns (naming, structure, props)
-6. Shared component library
-7. Linting/formatting
-8. Build tools and aliases
+5. Architecture pattern (MVVM, MVC, Feature-based, Atomic, Container/Presenter, Colocation, Clean Architecture)
+6. Component patterns (naming, structure, props, logic placement)
+7. Shared component library
+8. Linting/formatting
+9. Build tools and aliases
 
 Flag anything unusual or conflicting (e.g., both Jest and Vitest present, mixed naming conventions).
 
