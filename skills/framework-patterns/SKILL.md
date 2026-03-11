@@ -3,9 +3,13 @@ name: framework-patterns
 description: Use when making framework-specific implementation decisions - detects installed framework and provides patterns for React/Next.js, Vue, Svelte, or others based on what the project actually uses
 ---
 
+## Context Loading
+
+Before starting any work, read `.context/project-profile.md` and `.context/implementation-plan.md` (if they exist) to ground yourself in the project's framework, conventions, and the approved plan.
+
 ## Detection First
 
-Check what framework is installed via codebase-scan results. Do NOT assume React/Next.js if something else is present. Read `package.json` dependencies — use the project's actual framework.
+Check what framework is installed via codebase-scan results (or `.context/project-profile.md`). Do NOT assume React/Next.js if something else is present. Read `package.json` dependencies — use the project's actual framework.
 
 ## React / Next.js Patterns (default for greenfield)
 

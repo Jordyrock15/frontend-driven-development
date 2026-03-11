@@ -1,41 +1,69 @@
 ---
 name: frontend-workflow
-description: Use when implementing any UI code - enforces the build, screenshot verify, responsive check, and accessibility audit loop before claiming work is complete
+description: Use when implementing any UI code - enforces the build, screenshot verify, responsive check, accessibility audit, and verification loops before claiming work is complete
 ---
 
 # Frontend Implementation Loop
 
-Every UI change must pass all four phases. No exceptions. No skipping. No claiming completion without evidence from each phase.
+Every UI change must pass all phases. No exceptions. No skipping. No claiming completion without evidence from each phase.
+
+## Context Loading
+
+Before starting any work, read `.context/project-profile.md` and `.context/implementation-plan.md` (if they exist) to ground yourself in the project's conventions and the approved plan.
 
 ```
-Build -> Screenshot Verify -> Responsive Check -> Accessibility Audit
-  ^            |                    |                    |
-  |          FAIL?                FAIL?                FAIL?
-  +------------+--------------------+--------------------+
-                        FIX & RE-VERIFY
+Build -> TypeScript Check -> Lint/Test -> Screenshot Verify -> Responsive Check -> Accessibility Audit
+  ^            |                 |               |                    |                    |
+  |          FAIL?             FAIL?           FAIL?                FAIL?                FAIL?
+  +------------+-----------------+---------------+--------------------+--------------------+
+                                    FIX & RE-VERIFY (max 3 iterations per phase)
 ```
 
 ## Phase 1: Build
 
-- Implement the component following approved architecture
+- Implement the component following approved architecture (reference `.context/implementation-plan.md`)
 - Use strict TypeScript types (reference `frontend-driven-development:typescript-strictness`)
 - Follow framework patterns (reference `frontend-driven-development:framework-patterns`)
 - Include ALL states: loading, error, empty, populated
 - Handle edge cases: long text, missing data, rapid interactions
 
-## Phase 2: Screenshot Verify (HARD GATE)
+## Phase 2: TypeScript Compilation Loop
+
+After writing code, verify types compile cleanly:
+
+1. Run `tsc --noEmit` (or the project's equivalent type-check command)
+2. If type errors exist → read the errors → fix the root cause → re-run
+3. **Max 3 iterations.** If still failing after 3 attempts, stop and surface the remaining errors to the user with your diagnosis
+
+Do NOT suppress errors with `any`, `@ts-ignore`, or `as unknown as Type`. Fix the actual types.
+
+## Phase 3: Lint/Test Loop
+
+Run the project's linter and test suite:
+
+1. **Lint:** Run the project's linter (ESLint, Biome, etc. — detected from `.context/project-profile.md`)
+   - If failures → apply auto-fixes where available → re-run
+   - Manual fixes for non-auto-fixable issues
+   - **Max 2 iterations**
+2. **Test:** Run tests for affected files (using the project's test runner)
+   - If test failures → read the failure output → fix → re-run
+   - **Max 2 iterations**
+3. If still failing after iterations, stop and surface errors to the user
+
+## Phase 4: Screenshot Verify Loop (HARD GATE)
 
 This is a hard gate. You may NOT proceed without passing it.
 
 1. Start the dev server if not running
 2. Navigate to the implemented UI
 3. Take a screenshot or visually verify the output
-4. Review: does it match the intended design/layout?
-5. If issues found: fix and re-verify. Do NOT proceed until visual output is correct
+4. **Evaluate:** Does it match the design intent and the approved plan in `.context/implementation-plan.md`?
+5. If issues found → fix → re-screenshot
+6. **Max 3 iterations.** If still not matching after 3 attempts, flag for human review with a description of what's wrong and what you've tried
 
 **You may NOT claim UI work is done without visual evidence.**
 
-## Phase 3: Responsive Check
+## Phase 5: Responsive Check
 
 Verify at minimum three breakpoints:
 
@@ -54,7 +82,7 @@ Check at each breakpoint:
 
 Mobile-first: the mobile experience is not an afterthought.
 
-## Phase 4: Accessibility Audit
+## Phase 6: Accessibility Audit
 
 **Semantic HTML:** Correct heading hierarchy (h1 > h2 > h3, no skipping). Use landmarks (`nav`, `main`, `footer`). Use lists for list content.
 
@@ -72,11 +100,13 @@ Mobile-first: the mobile experience is not an afterthought.
 
 ## Completion
 
-All four phases must pass. Report evidence from each phase:
+All phases must pass. Report evidence from each phase:
 
 1. **Build** — component renders without errors, all states implemented
-2. **Screenshot** — visual output matches intent (attach screenshot or describe verification)
-3. **Responsive** — confirmed at 375px, 768px, 1280px
-4. **Accessibility** — semantic HTML, keyboard navigable, contrast passing, ARIA correct
+2. **TypeScript** — `tsc --noEmit` passes with zero errors
+3. **Lint/Test** — linter passes, tests pass
+4. **Screenshot** — visual output matches intent (attach screenshot or describe verification)
+5. **Responsive** — confirmed at 375px, 768px, 1280px
+6. **Accessibility** — semantic HTML, keyboard navigable, contrast passing, ARIA correct
 
-If any phase fails, loop back and fix. Do not report completion until all four phases have passing evidence.
+If any phase fails, loop back and fix. Do not report completion until all phases have passing evidence.
