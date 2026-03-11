@@ -49,11 +49,22 @@ Present one section at a time. Get approval before moving to the next.
 
 Compare the proposed architecture against codebase-scan findings. Flag any deviations from existing patterns and explicitly justify each one.
 
-### 5. User approves
+### 5. Define API Contracts
 
-Do not proceed until the user gives explicit approval of the full architecture.
+After the component breakdown is approved but before writing the implementation plan, define data contracts:
 
-### 6. Write `.context/implementation-plan.md`
+1. For each component that consumes external data, define a TypeScript interface for the expected API response
+2. For each component that sends data (forms, mutations), define the request payload interface
+3. For shared data shapes (e.g. a User object used across multiple components), define once and reference everywhere
+4. Include realistic mock data alongside each interface — at least 2-3 example records covering normal cases and edge cases (empty strings, null fields, long text, zero values)
+
+Present these to the user for approval alongside the architecture.
+
+### 6. User approves
+
+Do not proceed until the user gives explicit approval of the full architecture and API contracts.
+
+### 7. Write `.context/implementation-plan.md`
 
 After user approval, write the approved plan to `.context/implementation-plan.md`. Create the `.context/` directory if it doesn't exist. Use this structure:
 
@@ -80,8 +91,25 @@ After user approval, write the approved plan to `.context/implementation-plan.md
 ## State Management Decisions
 [What state lives where and why — local vs context vs external store]
 
-## API Contracts / Mock Data
-[API endpoints, response shapes, or mock data structures agreed upon]
+## API Contracts
+
+### [METHOD] [endpoint]
+\`\`\`typescript
+interface [ResponseName] {
+  // typed fields
+}
+\`\`\`
+
+### Mock Data
+\`\`\`typescript
+const mock[Name]: [ResponseType] = {
+  // normal case with realistic values
+};
+
+const mock[Name]EdgeCase: [ResponseType] = {
+  // edge case: nulls, empty strings, long text, zero values
+};
+\`\`\`
 
 ## Components to Reuse
 [Existing shared components that will be imported]

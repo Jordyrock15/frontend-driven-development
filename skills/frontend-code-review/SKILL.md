@@ -70,6 +70,15 @@ Before starting any review, read `.context/project-profile.md` and `.context/imp
 - Heavy components lazy loaded
 - No blocking operations in render path
 
+### 8. Bundle & Dependencies
+- No full-library imports for single utilities (e.g. `import _ from 'lodash'` is wrong, use `import { debounce } from 'lodash/debounce'`)
+- No wildcard imports (`import * as`) when named imports are available
+- If new dependencies were added:
+  - Check if the project already has a library for the same concern (reference `.context/project-profile.md`)
+  - Verify imports are tree-shakeable (named imports, not default/wildcard)
+  - Flag each new dependency to the user with justification and approximate size
+  - If a lighter alternative exists, mention it
+
 ## Review Output Format
 
 ```
@@ -82,11 +91,12 @@ Before starting any review, read `.context/project-profile.md` and `.context/imp
 **UI States:** [PASS/ISSUES] - [details]
 **Security:** [PASS/ISSUES] - [details]
 **Performance:** [PASS/ISSUES] - [details]
+**Bundle & Dependencies:** [PASS/ISSUES] - [details]
 
 **Verdict:** [APPROVED / CHANGES REQUIRED]
 ```
 
-Issues block approval. All 7 categories must pass.
+Issues block approval. All 8 categories must pass.
 
 ---
 

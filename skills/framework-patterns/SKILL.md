@@ -46,4 +46,14 @@ Check what framework is installed via codebase-scan results (or `.context/projec
 - Loading states are not optional — every async operation needs one.
 - Forms: controlled inputs, proper validation, accessible error messages.
 
+## Dynamic Imports
+
+For route-level components and heavy libraries, prefer dynamic imports to reduce initial bundle size:
+
+- **React:** `React.lazy(() => import('./HeavyComponent'))`
+- **Next.js:** `dynamic(() => import('./HeavyComponent'))`
+- **Vue:** `defineAsyncComponent(() => import('./HeavyComponent.vue'))`
+
+Always dynamically import large third-party components (charts, editors, maps, rich text) unless they are above the fold on the initial page load.
+
 **The key rule: detect what's installed and adapt. Don't impose defaults.**
