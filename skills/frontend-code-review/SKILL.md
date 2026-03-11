@@ -1,11 +1,15 @@
 ---
 name: frontend-code-review
-description: Use when reviewing frontend code after implementation or between tasks - checks accessibility, responsive design, TypeScript strictness, component patterns, security, and UI state coverage
+description: Use when reviewing frontend code after implementation or between tasks - checks accessibility, responsive design, TypeScript strictness, component patterns, security, and UI state coverage. Includes mandatory completion gate.
 ---
 
 # Frontend Code Review
 
 Frontend-specific code review checklist. Complements general code review (superpowers:requesting-code-review if available). This skill focuses on frontend-specific quality that general reviewers miss.
+
+## Context Loading
+
+Before starting any review, read `.context/project-profile.md` and `.context/implementation-plan.md` (if they exist) to ground yourself in the project's conventions and the approved plan.
 
 ## When to Use
 
@@ -40,7 +44,7 @@ Frontend-specific code review checklist. Complements general code review (superp
 - Images don't break layout
 
 ### 4. Component Patterns
-- Matches existing codebase conventions (reference codebase-scan findings)
+- Matches existing codebase conventions (reference `.context/project-profile.md`)
 - Single responsibility — each component does one thing
 - Props are minimal and well-typed
 - State placed at correct level (no unnecessary lifting or prop drilling)
@@ -66,6 +70,15 @@ Frontend-specific code review checklist. Complements general code review (superp
 - Heavy components lazy loaded
 - No blocking operations in render path
 
+### 8. Bundle & Dependencies
+- No full-library imports for single utilities (e.g. `import _ from 'lodash'` is wrong, use `import { debounce } from 'lodash/debounce'`)
+- No wildcard imports (`import * as`) when named imports are available
+- If new dependencies were added:
+  - Check if the project already has a library for the same concern (reference `.context/project-profile.md`)
+  - Verify imports are tree-shakeable (named imports, not default/wildcard)
+  - Flag each new dependency to the user with justification and approximate size
+  - If a lighter alternative exists, mention it
+
 ## Review Output Format
 
 ```
@@ -78,8 +91,29 @@ Frontend-specific code review checklist. Complements general code review (superp
 **UI States:** [PASS/ISSUES] - [details]
 **Security:** [PASS/ISSUES] - [details]
 **Performance:** [PASS/ISSUES] - [details]
+**Bundle & Dependencies:** [PASS/ISSUES] - [details]
 
 **Verdict:** [APPROVED / CHANGES REQUIRED]
 ```
 
-Issues block approval. All 7 categories must pass.
+Issues block approval. All 8 categories must pass.
+
+---
+
+## Completion Gate (MANDATORY)
+
+**Before declaring ANY task complete, verify ALL of the following:**
+
+1. **TypeScript compiles with zero errors** — run `tsc --noEmit`
+2. **Linter passes with zero errors** — run the project's linter
+3. **All existing tests still pass** — run the full test suite
+4. **New tests exist for new functionality** — verify test files were created
+5. **No `any` types introduced** — search for `any` in changed files
+6. **Responsive at 3 breakpoints** — mobile 375px, tablet 768px, desktop 1280px
+7. **Basic accessibility** — no missing alt text, all interactive elements focusable, semantic HTML
+8. **No hardcoded secrets, API keys, or sensitive data in client code**
+9. **Component matches the approved plan** — cross-reference `.context/implementation-plan.md`
+
+**If any check fails, fix it before marking done.**
+
+If a check cannot be run (e.g., no test runner configured, no dev server available), note it explicitly in the review output rather than silently skipping it.

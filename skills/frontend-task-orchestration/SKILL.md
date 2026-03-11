@@ -7,11 +7,15 @@ description: Use after frontend architecture is approved and before implementati
 
 **Triggers after:** `frontend-driven-development:frontend-architecture` has an approved plan from the user.
 
+## Context Loading
+
+Before starting, read `.context/project-profile.md` and `.context/implementation-plan.md`. These files contain the project conventions and the approved architecture plan. Both are required — if either is missing, run the appropriate upstream skill first.
+
 ## Process (strict order)
 
 ### 1. Break Down the Approved Architecture into Tasks
 
-Identify natural task boundaries in frontend work:
+Reference the component breakdown and acceptance criteria in `.context/implementation-plan.md`. Identify natural task boundaries in frontend work:
 
 - **Shared types/interfaces** — must be FIRST, others depend on these
 - **Shared/reusable components** — depend on types, other tasks depend on these
@@ -31,16 +35,22 @@ Use TodoWrite/TaskCreate to track all tasks. Each task gets: description, files 
 
 One subagent per independent task. Each subagent receives:
 
-- The approved architecture (relevant section)
-- Codebase-scan results (conventions to follow)
+- The approved architecture (relevant section from `.context/implementation-plan.md`)
+- Project conventions (from `.context/project-profile.md`)
 - Its specific task with exact files and acceptance criteria
 - Instructions to follow: `typescript-strictness`, `framework-patterns`, `frontend-workflow`
+
+**Important:** Each subagent must read `.context/project-profile.md` and `.context/implementation-plan.md` at the start of its work to stay grounded in project conventions and the approved plan.
 
 Dispatch in parallel where the dependency graph allows. Run sequentially where dependencies exist. Review between dependent stages for spec compliance and code quality.
 
 **Task template for subagents:**
 
 ```
+Context files to read first:
+- .context/project-profile.md (project conventions)
+- .context/implementation-plan.md (approved architecture)
+
 Task: [name]
 Files: [create/modify list]
 Dependencies: [what must exist first]

@@ -3,9 +3,13 @@ name: framework-patterns
 description: Use when making framework-specific implementation decisions - detects installed framework and provides patterns for React/Next.js, Vue, Svelte, or others based on what the project actually uses
 ---
 
+## Context Loading
+
+Before starting any work, read `.context/project-profile.md` and `.context/implementation-plan.md` (if they exist) to ground yourself in the project's framework, conventions, and the approved plan.
+
 ## Detection First
 
-Check what framework is installed via codebase-scan results. Do NOT assume React/Next.js if something else is present. Read `package.json` dependencies — use the project's actual framework.
+Check what framework is installed via codebase-scan results (or `.context/project-profile.md`). Do NOT assume React/Next.js if something else is present. Read `package.json` dependencies — use the project's actual framework.
 
 ## React / Next.js Patterns (default for greenfield)
 
@@ -41,5 +45,15 @@ Check what framework is installed via codebase-scan results. Do NOT assume React
 - Error boundaries/error states at route level minimum.
 - Loading states are not optional — every async operation needs one.
 - Forms: controlled inputs, proper validation, accessible error messages.
+
+## Dynamic Imports
+
+For route-level components and heavy libraries, prefer dynamic imports to reduce initial bundle size:
+
+- **React:** `React.lazy(() => import('./HeavyComponent'))`
+- **Next.js:** `dynamic(() => import('./HeavyComponent'))`
+- **Vue:** `defineAsyncComponent(() => import('./HeavyComponent.vue'))`
+
+Always dynamically import large third-party components (charts, editors, maps, rich text) unless they are above the fold on the initial page load.
 
 **The key rule: detect what's installed and adapt. Don't impose defaults.**
