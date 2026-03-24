@@ -7,10 +7,6 @@ description: Use when building new components, pages, or features - enforces pla
 
 Do NOT write any component code until the architecture is approved by the user. No exceptions. This skill enforces a gate, not a suggestion.
 
-## Context Loading
-
-Before starting, read `.context/project-profile.md` (if it exists) to ground yourself in the project's conventions and detected patterns. If it doesn't exist, run `frontend-driven-development:codebase-scan` first.
-
 ## Process (strict order)
 
 ```

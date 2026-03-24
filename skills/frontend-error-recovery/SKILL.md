@@ -7,10 +7,6 @@ description: Use when encountering build failures, type errors, runtime errors, 
 
 **Purpose:** Structured diagnosis and recovery for common frontend failure categories. Follow this decision tree instead of blindly retrying.
 
-## Context Loading
-
-Before diagnosing, read `.context/project-profile.md` (if it exists) to understand the project's build tools, framework, and conventions — this often reveals the root cause faster.
-
 ## Core Principle
 
 1. **Read the full error message** — not just the first line

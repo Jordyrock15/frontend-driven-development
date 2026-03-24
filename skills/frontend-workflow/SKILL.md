@@ -1,21 +1,17 @@
 ---
 name: frontend-workflow
-description: Use when implementing any UI code - enforces the build, screenshot verify, responsive check, accessibility audit, and verification loops before claiming work is complete
+description: Use when implementing any UI code - enforces the build, screenshot verify, responsive check, accessibility audit, code review checklist, and verification loops before claiming work is complete
 ---
 
 # Frontend Implementation Loop
 
 Every UI change must pass all phases. No exceptions. No skipping. No claiming completion without evidence from each phase.
 
-## Context Loading
-
-Before starting any work, read `.context/project-profile.md` and `.context/implementation-plan.md` (if they exist) to ground yourself in the project's conventions and the approved plan.
-
 ```
-Build -> TypeScript Check -> Lint/Test -> Screenshot Verify -> Responsive Check -> Accessibility Audit
-  ^            |                 |               |                    |                    |
-  |          FAIL?             FAIL?           FAIL?                FAIL?                FAIL?
-  +------------+-----------------+---------------+--------------------+--------------------+
+Build -> TypeScript Check -> Lint/Test -> Screenshot Verify -> Responsive Check -> Accessibility Audit -> Code Review
+  ^            |                 |               |                    |                    |                    |
+  |          FAIL?             FAIL?           FAIL?                FAIL?                FAIL?               FAIL?
+  +------------+-----------------+---------------+--------------------+--------------------+--------------------+
                                     FIX & RE-VERIFY (max 3 iterations per phase)
 ```
 
@@ -27,9 +23,11 @@ Build -> TypeScript Check -> Lint/Test -> Screenshot Verify -> Responsive Check 
 - Include ALL states: loading, error, empty, populated
 - Handle edge cases: long text, missing data, rapid interactions
 
-## Phase 2: TypeScript Compilation Loop
+## Phase 2+3: TypeScript + Lint/Test (run in parallel)
 
-After writing code, verify types compile cleanly:
+**Run TypeScript compilation and lint/test concurrently** — they are independent checks. Fix errors from whichever fails.
+
+### TypeScript Compilation
 
 1. Run `tsc --noEmit` (or the project's equivalent type-check command)
 2. If type errors exist → read the errors → fix the root cause → re-run
@@ -37,9 +35,7 @@ After writing code, verify types compile cleanly:
 
 Do NOT suppress errors with `any`, `@ts-ignore`, or `as unknown as Type`. Fix the actual types.
 
-## Phase 3: Lint/Test Loop
-
-Run the project's linter and test suite:
+### Lint/Test
 
 1. **Lint:** Run the project's linter (ESLint, Biome, etc. — detected from `.context/project-profile.md`)
    - If failures → apply auto-fixes where available → re-run
@@ -65,7 +61,7 @@ This is a hard gate. You may NOT proceed without passing it.
 
 ## Phase 5: Responsive Check
 
-Verify at minimum three breakpoints:
+Verify at minimum three breakpoints. **Screenshot all 3 breakpoints in parallel** — they are independent checks.
 
 | Breakpoint | Width |
 |------------|-------|
@@ -98,15 +94,71 @@ Mobile-first: the mobile experience is not an afterthought.
 
 **Focus management:** Trap focus in modals. Restore focus on close. Logical tab order.
 
-## Completion
+## Phase 7: Code Review Checklist
 
-All phases must pass. Report evidence from each phase:
+Run through this checklist against all changed files. Every category must PASS.
 
-1. **Build** — component renders without errors, all states implemented
-2. **TypeScript** — `tsc --noEmit` passes with zero errors
-3. **Lint/Test** — linter passes, tests pass
-4. **Screenshot** — visual output matches intent (attach screenshot or describe verification)
-5. **Responsive** — confirmed at 375px, 768px, 1280px
-6. **Accessibility** — semantic HTML, keyboard navigable, contrast passing, ARIA correct
+### TypeScript Strictness
+- No `any` anywhere — check for `as any`, `: any`, `any[]`, `Record<string, any>`
+- No `@ts-ignore` or `@ts-expect-error` without documented reason
+- Props have explicit interfaces
+- Event handlers use proper React/framework event types
+- API responses are properly typed
 
-If any phase fails, loop back and fix. Do not report completion until all phases have passing evidence.
+### Component Patterns
+- Matches existing codebase conventions (reference `.context/project-profile.md`)
+- Single responsibility — each component does one thing
+- Props are minimal and well-typed
+- State placed at correct level (no unnecessary lifting or prop drilling)
+
+### UI States
+- Loading state present for async operations
+- Error state present with user-friendly message
+- Empty state present (not just blank screen)
+- Edge cases: long text, missing optional data, rapid interactions
+
+### Security
+- No unsafe innerHTML usage without sanitization
+- No auth tokens in localStorage
+- No API keys in client code
+- User input sanitized before display
+- URL params validated before use
+
+### Performance
+- No unnecessary re-renders (check dependency arrays, memoization where needed)
+- Images optimized (next/image or equivalent, proper sizing)
+- Heavy components lazy loaded
+- No blocking operations in render path
+
+### Bundle & Dependencies
+- No full-library imports (`import _ from 'lodash'` → `import { debounce } from 'lodash/debounce'`)
+- No wildcard imports when named imports are available
+- New dependencies flagged to user with justification and approximate size
+- Check if project already has a library for the same concern
+
+**Review output format:**
+
+```
+## Code Review
+TypeScript:    [PASS/FAIL]
+Components:    [PASS/FAIL]
+UI States:     [PASS/FAIL]
+Security:      [PASS/FAIL]
+Performance:   [PASS/FAIL]
+Bundle:        [PASS/FAIL]
+Verdict:       [APPROVED / CHANGES REQUIRED]
+```
+
+Any FAIL blocks approval. Fix before proceeding.
+
+## Completion Gate (MANDATORY)
+
+All phases above must PASS. Do not declare the task complete until every phase has passing evidence. If a phase cannot be run (e.g., no test runner configured, no dev server available), note it explicitly rather than silently skipping it.
+
+**Additional checks not covered by earlier phases:**
+- New tests exist for new functionality (not just that existing tests pass)
+- No `any` types introduced — grep changed files
+- No hardcoded secrets or API keys in client code
+- Component matches the approved plan — cross-reference `.context/implementation-plan.md`
+
+**If any check fails, fix it before marking done.**

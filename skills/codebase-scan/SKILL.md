@@ -28,17 +28,14 @@ This should take seconds, not minutes. Preserve existing sections that haven't c
 
 ## Full Scan Process
 
-Execute these steps in order:
+Execute Step 0 and Step 0.5 first (git check + size detection). Then run **Steps 1–3 in parallel** — they are independent reads and globs that don't depend on each other. Steps 4 and 5 depend on Step 3's directory results, so run them after.
 
 ### Step 0: Git Health Check
 
 Before scanning the codebase structure, check the git state:
 
-1. Run `git status` — check for uncommitted changes, staged files, untracked files
-2. Run `git branch --show-current` — record the current branch name
-3. Run `git log --oneline -5` — get recent commit context
-4. Run `git diff --stat HEAD~1` — see what changed recently
-5. Check if the branch is behind its remote tracking branch (`git status -sb`)
+1. Run `git status -sb` — covers branch name, remote tracking status, uncommitted changes, and untracked files in one command
+2. Run `git log --oneline -5` — get recent commit context
 
 **Behavioural rules based on findings:**
 
@@ -49,19 +46,31 @@ Before scanning the codebase structure, check the git state:
 
 Include findings in `.context/project-profile.md` under a "Git State" section.
 
-### Step 1: Read `package.json`
+### Step 0.5: Large Codebase Detection
 
-Extract `dependencies` and `devDependencies`. From these, detect:
+After the git health check, determine the codebase size:
 
+1. Run `find src -type f | wc -l` (or the equivalent top-level source directory)
+2. Check if `package.json` contains workspaces (monorepo signal)
+3. Run `du -sh node_modules 2>/dev/null` to gauge dependency footprint
+
+**Classification:**
+- **Small** (<100 source files, single package): No restrictions. Run all steps normally.
+- **Medium** (100–500 source files): Apply the limits described in each step below.
+- **Large** (500+ source files or monorepo): Apply strict limits — glob depth capped at 3, read limits enforced, sampling mode for components and tests.
+
+Record the classification in `.context/project-profile.md` under a "Codebase Size" section. All downstream steps reference this classification.
+
+### Step 1: Read `package.json` and Catalogue Dependencies
+
+Read `package.json` once. Extract `dependencies` and `devDependencies`, then detect and categorise in a single pass:
+
+**Core stack detection:**
 - **Framework:** react, next, vue, nuxt, svelte, angular, astro, solid-js, etc.
-- **Styling:** tailwindcss, styled-components, @emotion/*, sass, less. Also check for CSS module usage in step 5.
+- **Styling:** tailwindcss, styled-components, @emotion/*, sass, less. Also check for CSS module usage in Step 4.
 - **Testing:** playwright, vitest, jest, cypress, @testing-library/*.
-- **State management:** zustand, redux, @reduxjs/toolkit, jotai, recoil, valtio, mobx, pinia.
-- **Shared components / UI libraries:** @radix-ui/*, @shadcn/ui, @mui/material, antd, @chakra-ui/react.
 
-### Step 2: Catalogue Dependencies by Category
-
-Read `package.json` dependencies and devDependencies. Categorise every relevant library:
+**Dependency categories:**
 
 | Category | Libraries to detect |
 |---|---|
@@ -79,19 +88,17 @@ Read `package.json` dependencies and devDependencies. Categorise every relevant 
 
 **Rule: If a library exists in the project for a given concern, USE IT. Do not install alternatives or hand-roll solutions.**
 
-### Step 3: Glob for config files
+### Step 2: Glob for config and convention files
 
-Search for: `*.config.*`, `tsconfig.json`, `.eslintrc*`, `.prettierrc*`, `biome.json`, `postcss.config.*`, `tailwind.config.*`.
+Glob for all config and convention files in a single pass: `*.config.*`, `tsconfig.json`, `.eslintrc*`, `.prettierrc*`, `biome.json`, `postcss.config.*`, `tailwind.config.*`, `CLAUDE.md`, `.cursorrules`, `CONTRIBUTING.md`, `.editorconfig`.
 
-Detect from these:
+From the files found, detect:
 
-- **Linting/formatting:** ESLint (eslint.config or .eslintrc*), Prettier (.prettierrc* or prettier.config), Biome (biome.json).
-- **Build tools:** Vite (vite.config), Next.js (next.config), Webpack (webpack.config), tsconfig paths/aliases.
-- **Styling (confirmation):** tailwind.config, postcss.config.
+- **Linting/formatting:** ESLint (eslint.config or .eslintrc*), Prettier (.prettierrc* or prettier.config), Biome (biome.json)
+- **Build tools:** Vite (vite.config), Next.js (next.config), Webpack (webpack.config), tsconfig paths/aliases
+- **Styling (confirmation):** tailwind.config, postcss.config
 
-### Step 4: Detect Convention Files
-
-Search the project root for these files and extract relevant rules:
+Then read the relevant files and extract rules:
 
 | File | What to extract |
 |---|---|
@@ -104,9 +111,11 @@ Search the project root for these files and extract relevant rules:
 | `tsconfig.json` | strict mode, paths, baseUrl, target, module resolution |
 | `biome.json` | Formatting + linting rules |
 
+**Read limits:** Read the first 100 lines of each config file. Key settings (strict mode, paths, formatting style) are always near the top. Exhaustive rule overrides in eslint/biome configs do not need to be catalogued — just note the tool is in use and capture any non-default settings visible in the first 100 lines.
+
 **These project conventions take priority over this skill's default recommendations.** If a project's CLAUDE.md says to use a specific pattern, follow it even if it contradicts general best practices.
 
-### Step 5: Glob for component directories
+### Step 3: Glob for component directories and detect architecture
 
 Search for: `src/components`, `src/app`, `src/pages`, `app/`, `pages/`, `src/features`, `src/ui`, `src/domain`, `src/application`, `src/infrastructure`, `src/views`, `src/viewmodels`, `src/models`, `src/controllers`, `src/containers`, `src/presenters`, `src/atoms`, `src/molecules`, `src/organisms`, `src/templates`.
 
@@ -116,9 +125,12 @@ Check for barrel exports (`index.ts` re-exports) in component directories.
 
 Check for shared/common/ui component directories.
 
-### Step 6: Detect architecture pattern
+**Token limits:**
+- Limit all globs to **depth 3** (e.g. `src/components/*/*` not deeper).
+- If more than **50 directories** are found, stop enumerating. List only the top-level structure and sample 2-3 representative feature/component folders to determine the pattern.
+- For barrel export detection, check **5 directories max** — just enough to confirm whether the convention exists.
 
-Based on folder structure and file patterns from steps 1-5, identify which pattern the codebase follows:
+**Architecture detection:** Based on the directories found, identify the pattern:
 
 | Pattern | Detection signals |
 |---|---|
@@ -132,9 +144,11 @@ Based on folder structure and file patterns from steps 1-5, identify which patte
 
 Report whichever pattern is detected. If mixed or unclear, note that. New components MUST follow the detected pattern — do not introduce a different architecture.
 
-### Step 7: Read 3-5 representative components
+### Step 4: Read 3-5 representative components
 
-Pick components from different directories. For each, detect:
+Pick components from different directories. **Read only the first 50 lines of each component.** Conventions (naming, props pattern, imports, styling approach, logic placement) are virtually always visible in the top of the file. Only read beyond 50 lines if the pattern is genuinely unclear from the top.
+
+For each, detect:
 
 - **Naming convention:** PascalCase filenames? kebab-case?
 - **Props patterns:** TypeScript interfaces vs type aliases?
@@ -142,11 +156,13 @@ Pick components from different directories. For each, detect:
 - **State management patterns:** React context usage, hooks, store imports?
 - **Logic placement:** Where does business logic live? (in component, in hooks, in viewmodels, in services?)
 
-### Step 8: Check test files
+### Step 5: Check test files
 
-Glob for `**/*.test.*`, `**/*.spec.*`, `**/__tests__/**`.
+Use a **count-only glob** for `**/*.test.*`, `**/*.spec.*`, `**/__tests__/**` to determine test file volume. Do not enumerate every test file.
 
-Detect: co-located tests (next to components) vs separate `__tests__/` directories. Note testing patterns (render, screen, expect conventions).
+Then read **1-2 test files** to detect conventions (co-located vs `__tests__/` directories, render/screen/expect patterns, mocking approach).
+
+**For large codebases (500+ files):** Only glob for test files within the directories already sampled in Steps 3 and 4. Do not scan the entire tree.
 
 ## Output
 
@@ -162,8 +178,8 @@ Summarize findings before proceeding. List what was detected for each category:
 8. Shared component library
 9. Linting/formatting
 10. Build tools and aliases
-11. Key dependencies by category (from Step 2)
-12. Project conventions (from Step 4)
+11. Key dependencies by category (from Step 1)
+12. Project conventions (from Step 2)
 
 Flag anything unusual or conflicting (e.g., both Jest and Vitest present, mixed naming conventions).
 

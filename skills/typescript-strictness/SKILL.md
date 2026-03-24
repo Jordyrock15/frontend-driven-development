@@ -5,10 +5,6 @@ description: Use when writing any TypeScript code - bans the use of any, enforce
 
 # TypeScript Strictness
 
-## Context Loading
-
-Before starting any work, read `.context/project-profile.md` (if it exists) to check for project-specific TypeScript conventions (tsconfig settings, path aliases, etc.).
-
 ## The Rule
 
 NEVER use `any`. If you write `any`, delete it and type it properly. No exceptions.
@@ -32,13 +28,9 @@ NEVER use `any`. If you write `any`, delete it and type it properly. No exceptio
 
 | Excuse | Reality |
 |--------|---------|
-| "The API shape is too complex" | Define the type. Complex shapes need types MORE, not less. |
+| "The API shape is too complex" | Complex shapes need types MORE, not less. Define the type. |
 | "I'll type it properly later" | You won't. Type it now. |
-| "It's just a utility function" | Utility functions spread everywhere. Bad types propagate. |
-| "The types would be too verbose" | Extract a type alias. Verbose types > invisible bugs. |
-| "TypeScript can infer it" | If it infers correctly, you don't need `any`. Let it infer. |
 | "I need `any` for this pattern" | You need generics for this pattern. |
-| "It's a quick prototype" | Prototypes become production. Type it now. |
 | "The library doesn't have types" | Write a declaration file. 5 minutes now saves hours. |
 
 ## Red Flags — STOP and Retype

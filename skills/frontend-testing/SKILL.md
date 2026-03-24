@@ -3,10 +3,6 @@ name: frontend-testing
 description: Use when writing or modifying frontend tests - adapts to installed testing tools, covers E2E, unit, integration, and accessibility testing with proper query patterns
 ---
 
-## Context Loading
-
-Before starting any work, read `.context/project-profile.md` and `.context/implementation-plan.md` (if they exist) to ground yourself in the project's testing tools, conventions, and the approved plan.
-
 ## Detection First
 
 Check codebase-scan results (or `.context/project-profile.md`) for installed testing tools before giving any guidance. Adapt ALL recommendations to the actual tools in the project. Do NOT assume Playwright/Vitest if the project uses Cypress, Jest, or something else. Match the project's existing patterns.

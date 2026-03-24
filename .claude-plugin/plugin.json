@@ -1,10 +1,10 @@
 {
   "name": "frontend-driven-development",
-  "description": "Disciplined frontend development: task classification, persistent context, codebase-aware architecture, verification loops, strict TypeScript, error recovery, and parallel task orchestration",
-  "version": "0.3.0",
+  "description": "Disciplined frontend development: task classification, persistent context, codebase-aware architecture, verification loops, strict TypeScript, error recovery, parallel task orchestration, bundle analysis, and git workflow",
+  "version": "0.4.0",
   "author": {
     "name": "Jordan Barrand"
   },
   "license": "MIT",
-  "keywords": ["frontend", "react", "nextjs", "typescript", "architecture", "testing", "accessibility", "security", "code-review", "error-recovery", "task-classification"]
+  "keywords": ["frontend", "react", "nextjs", "typescript", "architecture", "testing", "accessibility", "security", "performance", "bundle", "git", "error-recovery", "task-classification"]
 }

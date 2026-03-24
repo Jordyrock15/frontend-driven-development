@@ -3,10 +3,6 @@ name: frontend-security
 description: Use when writing any frontend code that handles user input, authentication, data display, or external data - enforces XSS prevention, secure auth patterns, CSP, and input sanitization
 ---
 
-## Context Loading
-
-Before starting any work, read `.context/project-profile.md` (if it exists) to check for project-specific security conventions, dependencies, and authentication patterns.
-
 ## Core Principle
 
 Frontend security is defence in depth. Never rely solely on server-side validation. The frontend is a trust boundary.
