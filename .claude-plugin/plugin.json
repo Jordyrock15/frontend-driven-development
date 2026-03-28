@@ -1,7 +1,7 @@
 {
   "name": "frontend-driven-development",
   "description": "Disciplined frontend development: task classification, persistent context, codebase-aware architecture, verification loops, strict TypeScript, error recovery, parallel task orchestration, bundle analysis, and git workflow",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": {
     "name": "Jordan Barrand"
   },
