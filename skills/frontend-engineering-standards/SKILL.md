@@ -35,12 +35,12 @@ Before activating any other skill, classify the incoming task into one of three 
 1. Read `.context/project-profile.md` if it exists (do NOT re-scan)
 2. Check immediate surrounding files for conventions
 3. Ask 1-2 clarifying questions ONLY if genuinely ambiguous
-4. Build the component
+4. Break work into independent tasks and dispatch subagents in parallel using `frontend-driven-development:frontend-task-orchestration` (e.g. component implementation, tests, and types as parallel tasks)
 5. Run `frontend-driven-development:frontend-workflow` (type check, lint, screenshot if visual)
 
-**What gets skipped:** Full codebase scan, full architecture planning, task orchestration / subagents.
+**What gets skipped:** Full codebase scan, full architecture planning.
 
-**Say:** "This is a single component task — I'll read existing context and build it directly."
+**Say:** "This is a single component task — I'll read existing context and use subagents to build it."
 
 ### Tier 3 — Feature
 
